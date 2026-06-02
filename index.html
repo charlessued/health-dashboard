@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Charles — Health & Wellness Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a1a;min-height:100vh}
+.header{background:linear-gradient(135deg,#1A6B3C 0%,#2E8B57 100%);color:white;padding:22px 40px;display:flex;align-items:center;justify-content:space-between}
+.header-left h1{font-size:24px;font-weight:700;letter-spacing:-0.5px}
+.header-left p{font-size:13px;opacity:.75;margin-top:3px}
+.header-right{text-align:right;font-size:12px;opacity:.7}
+.header-right .updated{font-size:13px;opacity:.9;margin-bottom:2px}
+.wrap{max-width:1400px;margin:0 auto;padding:28px 32px}
+
+/* Stat cards */
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:24px}
+@media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.cards{grid-template-columns:repeat(2,1fr)}}
+.card{background:white;border-radius:14px;padding:18px 16px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-top:4px solid #ccc}
+.card-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#999;margin-bottom:8px}
+.card-value{font-size:28px;font-weight:800;line-height:1;margin-bottom:5px}
+.card-sub{font-size:11px;color:#888}
+.card-weight{border-top-color:#1565C0}.card-weight .card-value{color:#1565C0}
+.card-lost{border-top-color:#1A6B3C}.card-lost .card-value{color:#1A6B3C}
+.card-steps{border-top-color:#00695C}.card-steps .card-value{color:#00695C}
+.card-cal{border-top-color:#E65100}.card-cal .card-value{color:#E65100}
+.card-sleep{border-top-color:#3949AB}.card-sleep .card-value{color:#3949AB}
+.card-hr{border-top-color:#B71C1C}.card-hr .card-value{color:#B71C1C}
+
+/* Goal bar */
+.goal-bar-wrap{background:white;border-radius:14px;padding:18px 24px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.goal-bar-label{display:flex;justify-content:space-between;font-size:13px;color:#555;margin-bottom:8px}
+.goal-bar-label span:first-child{font-weight:600}
+.goal-bar{height:12px;background:#e8f5e9;border-radius:6px;overflow:hidden}
+.goal-bar-fill{height:100%;background:linear-gradient(90deg,#1A6B3C,#2E8B57);border-radius:6px;transition:width .8s ease}
+.goal-milestones{display:flex;justify-content:space-between;font-size:11px;color:#999;margin-top:5px}
+
+/* Section boxes */
+.section{background:white;border-radius:14px;padding:22px 24px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.section-title{font-size:12px;font-weight:700;color:#1A6B3C;text-transform:uppercase;letter-spacing:.7px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e8f5e9;display:flex;align-items:center;gap:8px}
+
+/* 2-col grid */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+@media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+.grid-2 .section{margin-bottom:0}
+
+/* Charts */
+.chart-title{font-size:14px;font-weight:700;color:#222;margin-bottom:2px}
+.chart-sub{font-size:11px;color:#888;margin-bottom:16px}
+.chart-wrap{position:relative;width:100%}
+
+/* Week table */
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:#1A6B3C;color:white;padding:10px 14px;text-align:left;font-weight:600;font-size:12px;letter-spacing:.3px}
+thead th:first-child{border-radius:8px 0 0 0}
+thead th:last-child{border-radius:0 8px 0 0}
+tbody td{padding:10px 14px;border-bottom:1px solid #f0f0f0}
+tbody tr:last-child td{border-bottom:none}
+tbody tr.best{background:#e8f5e9}
+tbody tr.best td{font-weight:700;color:#1A6B3C}
+tbody tr:not(.best):hover{background:#fafafa}
+.steps-bar{display:flex;align-items:center;gap:8px}
+.steps-bar-inner{flex:1;height:6px;background:#e8f5e9;border-radius:3px;overflow:hidden;min-width:60px}
+.steps-bar-fill{height:100%;background:#1A6B3C;border-radius:3px}
+
+/* Coaching */
+.coaching-grid{display:flex;flex-direction:column;gap:0}
+.coaching-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid #f5f5f5;align-items:flex-start}
+.coaching-item:last-child{border-bottom:none}
+.badge{flex-shrink:0;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
+.badge-win{background:#e8f5e9;color:#1A6B3C}
+.badge-weight{background:#e3f2fd;color:#1565C0}
+.badge-food{background:#fff8e1;color:#C8960C}
+.badge-chol{background:#fdecea;color:#B71C1C}
+.badge-goal{background:#ede7f6;color:#4A148C}
+.badge-alert{background:#fff3e0;color:#E65100}
+.coaching-text{font-size:13px;line-height:1.6;color:#333}
+
+/* Labs */
+.labs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:900px){.labs-grid{grid-template-columns:repeat(2,1fr)}}
+.lab-card{padding:12px 14px;border-radius:10px;border-left:4px solid}
+.lab-ok{background:#e8f5e9;border-color:#1A6B3C}
+.lab-high{background:#fdecea;border-color:#B71C1C}
+.lab-borderline{background:#fff8e1;border-color:#C8960C}
+.lab-name{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.lab-value{font-size:20px;font-weight:800;margin-bottom:2px}
+.lab-ok .lab-value{color:#1A6B3C}
+.lab-high .lab-value{color:#B71C1C}
+.lab-borderline .lab-value{color:#C8960C}
+.lab-normal{font-size:11px;color:#888}
+.lab-status{font-size:10px;font-weight:700;margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
+.lab-ok .lab-status{color:#1A6B3C}
+.lab-high .lab-status{color:#B71C1C}
+.lab-borderline .lab-status{color:#C8960C}
+
+/* Meals */
+.meal-row{display:grid;grid-template-columns:80px 1fr 60px 50px 50px 50px;gap:8px;padding:9px 0;border-bottom:1px solid #f5f5f5;font-size:13px;align-items:center}
+.meal-row:last-child{border-bottom:none}
+.meal-header{font-weight:700;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding-bottom:6px;border-bottom:2px solid #e8f5e9;margin-bottom:2px}
+.meal-badge{padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700}
+.mb-breakfast{background:#fff8e1;color:#C8960C}
+.mb-lunch{background:#e8f5e9;color:#1A6B3C}
+.mb-dinner{background:#e3f2fd;color:#1565C0}
+.mb-snack{background:#fce4ec;color:#880E4F}
+.meal-total{display:flex;justify-content:space-between;padding:10px 0 0;font-size:13px;font-weight:700;color:#333;border-top:2px solid #e8f5e9;margin-top:4px}
+.meal-coach{font-size:11px;color:#888;margin-top:2px;font-style:italic}
+
+/* Long term section */
+.lt-header{background:linear-gradient(135deg,#0D2B6E,#1565C0);border-radius:14px;padding:18px 24px;margin-bottom:20px;color:white}
+.lt-header h2{font-size:16px;font-weight:700;margin-bottom:4px}
+.lt-header p{font-size:12px;opacity:.8}
+
+/* Loading */
+#loading{position:fixed;inset:0;background:rgba(255,255,255,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
+.spinner{width:40px;height:40px;border:4px solid #e8f5e9;border-top-color:#1A6B3C;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading p{font-size:14px;color:#555}
+
+/* Footer */
+footer{text-align:center;padding:24px;font-size:12px;color:#aaa}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p>Loading your health data...</p>
+</div>
+
+<div id="app" style="display:none">
+
+<div class="header">
+  <div class="header-left">
+    <h1>Charles — Health &amp; Wellness Dashboard</h1>
+    <p>Goal: 195 lbs &nbsp;|&nbsp; Calorie target: 1,850 kcal/day &nbsp;|&nbsp; Wegovy 2.4mg every Wednesday</p>
+  </div>
+  <div class="header-right">
+    <div class="updated" id="hdr-updated"></div>
+    <div id="hdr-weight"></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- STAT CARDS -->
+  <div class="cards" id="stat-cards"></div>
+
+  <!-- PROGRESS BAR -->
+  <div class="goal-bar-wrap">
+    <div class="goal-bar-label">
+      <span>Weight Loss Journey</span>
+      <span id="progress-label"></span>
+    </div>
+    <div class="goal-bar"><div class="goal-bar-fill" id="progress-fill"></div></div>
+    <div class="goal-milestones">
+      <span>Start: 260 lbs</span>
+      <span id="prog-mid"></span>
+      <span>Goal: 195 lbs</span>
+    </div>
+  </div>
+
+  <!-- WEEKLY CHARTS ROW 1 -->
+  <div class="grid-2">
+    <div class="section">
+      <div class="chart-title">Weight This Week</div>
+      <div class="chart-sub" id="wt-sub"></div>
+      <div class="chart-wrap"><canvas id="chartWeight" height="220"></canvas></div>
+    </div>
+    <div class="section">
+      <div class="chart-title">Daily Steps This Week</div>
+      <div class="chart-sub">Goal: 7,000 steps/day &nbsp;|&nbsp; Green bar = goal reached</div>
+      <div class="chart-wrap"><canvas id="chartSteps" height="220"></canvas></div>
+    </div>
+  </div>
+
+  <!-- WEEKLY CHARTS ROW 2 -->
+  <div class="grid-2">
+    <div class="section">
+      <div class="chart-title">Sleep Hours This Week</div>
+      <div class="chart-sub">Goal: 7+ hours/night</div>
+      <div class="chart-wrap"><canvas id="chartSleep" height="200"></canvas></div>
+    </div>
+    <div class="section">
+      <div class="chart-title">Active Calories Burned</div>
+      <div class="chart-sub">Daily active energy expenditure (kcal)</div>
+      <div class="chart-wrap"><canvas id="chartCal" height="200"></canvas></div>
+    </div>
+  </div>
+
+  <!-- WEEK TABLE + COACHING -->
+  <div class="grid-2">
+    <div class="section">
+      <div class="section-title">📅 This Week at a Glance</div>
+      <table id="week-table">
+        <thead><tr>
+          <th>Date</th><th>Steps</th><th>Distance</th><th>Active Cal</th><th>Sleep</th><th>Avg HR</th><th>Weight</th>
+        </tr></thead>
+        <tbody id="week-body"></tbody>
+      </table>
+    </div>
+    <div class="section">
+      <div class="section-title">💬 Coaching Notes</div>
+      <div class="coaching-grid" id="coaching-grid"></div>
+    </div>
+  </div>
+
+  <!-- MEALS -->
+  <div class="section">
+    <div class="section-title">🍽️ Weekly Meals</div>
+    <div class="meal-row meal-header">
+      <span>Meal</span><span>Food</span><span>Calories</span><span>Protein</span><span>Carbs</span><span>Fat</span>
+    </div>
+    <div id="meal-list"></div>
+    <div class="meal-total" id="meal-total"></div>
+  </div>
+
+  <!-- LAB SNAPSHOT -->
+  <div class="section">
+    <div class="section-title">🧪 Lab Snapshot — <span id="lab-date"></span> &nbsp;|&nbsp; Next labs: <span id="lab-next"></span></div>
+    <div class="labs-grid" id="labs-grid"></div>
+  </div>
+
+  <!-- LONG TERM SECTION -->
+  <div class="lt-header">
+    <h2>📊 Long-Term Weight Journey — 2020 to 2026</h2>
+    <p>Quarterly Withings scale data &nbsp;|&nbsp; Peak: 258 lbs (Q1 2023) → Current: 207.8 lbs → Goal: 195 lbs</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="section">
+      <div class="chart-title">Weight Journey 2020–2026</div>
+      <div class="chart-sub">Quarterly data from Withings scale &nbsp;|&nbsp; Red line = 195 lb goal</div>
+      <div class="chart-wrap"><canvas id="chartLTWeight" height="280"></canvas></div>
+    </div>
+    <div class="section">
+      <div class="chart-title">Body Composition 2021–2026</div>
+      <div class="chart-sub">Body Fat % (orange, left axis) &nbsp;|&nbsp; Muscle Mass lbs (green, right axis)</div>
+      <div class="chart-wrap"><canvas id="chartBodyComp" height="280"></canvas></div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<footer>Charles Health Dashboard &nbsp;·&nbsp; Data from Apple Health, Withings Scale &nbsp;·&nbsp; Powered by Claude</footer>
+</div><!-- /app -->
+
+<script>
+// ─── DATA SOURCE ──────────────────────────────────────────────────
+// This URL points to the published Google Sheet (CSV).
+// Claude updates the sheet each session — the dashboard always shows live data.
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWByE_JhsHCer30f8ScsBMc65blL2FGa1SsvD6CDKEGCJOTEj9XXPRKM1MHebS9VJF4JhmrkWCen0m/pub?output=csv';
+
+// ─── EMBEDDED DATA (fallback + current data) ──────────────────────
+// Claude updates this section each session as well.
+let DATA = {
+  profile: {
+    name: "Charles",
+    currentWeight: 207.8,
+    goalWeight: 195,
+    startWeight: 260,
+    totalLost: 52.2,
+    targetCalories: 1850,
+    lastUpdated: "June 1, 2026"
+  },
+  weekly: [
+    {date:"May 25",weight:206.9,steps:10319,activeKcal:626,sleepHr:5.86,hrAvg:81.1,distance:4.86},
+    {date:"May 26",weight:208.2,steps:6377, activeKcal:541,sleepHr:null,hrAvg:87.6,distance:3.00},
+    {date:"May 27",weight:208.7,steps:7363, activeKcal:723,sleepHr:6.67,hrAvg:75.6,distance:3.54},
+    {date:"May 28",weight:208.8,steps:7088, activeKcal:550,sleepHr:null,hrAvg:75.1,distance:3.26},
+    {date:"May 29",weight:207.8,steps:4387, activeKcal:433,sleepHr:null,hrAvg:76.8,distance:2.05},
+    {date:"May 30",weight:null, steps:12758,activeKcal:814,sleepHr:null,hrAvg:80.3,distance:5.89},
+    {date:"May 31",weight:null, steps:14064,activeKcal:749,sleepHr:null,hrAvg:92.2,distance:6.43}
+  ],
+  quarterly: [
+    {label:"2020 Q1",weight:241.1,fat:null,  muscle:null},
+    {label:"2020 Q2",weight:241.2,fat:null,  muscle:null},
+    {label:"2020 Q3",weight:216.3,fat:null,  muscle:null},
+    {label:"2021 Q1",weight:230.5,fat:77.8,  muscle:144.2},
+    {label:"2021 Q2",weight:219.4,fat:73.4,  muscle:145.6},
+    {label:"2021 Q3",weight:234.1,fat:67.0,  muscle:153.8},
+    {label:"2021 Q4",weight:221.5,fat:null,  muscle:null},
+    {label:"2022 Q1",weight:250.6,fat:88.0,  muscle:158.5},
+    {label:"2022 Q2",weight:224.7,fat:82.5,  muscle:140.7},
+    {label:"2022 Q3",weight:237.4,fat:75.3,  muscle:149.4},
+    {label:"2022 Q4",weight:235.3,fat:80.5,  muscle:142.3},
+    {label:"2023 Q1",weight:258.2,fat:93.8,  muscle:156.9},
+    {label:"2023 Q2",weight:255.0,fat:94.7,  muscle:147.7},
+    {label:"2023 Q3",weight:247.0,fat:91.4,  muscle:143.8},
+    {label:"2024 Q1",weight:228.2,fat:77.8,  muscle:141.9},
+    {label:"2024 Q2",weight:238.1,fat:79.0,  muscle:147.2},
+    {label:"2024 Q3",weight:237.4,fat:85.3,  muscle:139.7},
+    {label:"2024 Q4",weight:224.5,fat:80.5,  muscle:143.1},
+    {label:"2025 Q1",weight:220.9,fat:77.5,  muscle:136.9},
+    {label:"2025 Q2",weight:220.9,fat:73.2,  muscle:140.5},
+    {label:"2025 Q3",weight:214.6,fat:69.4,  muscle:137.1},
+    {label:"2025 Q4",weight:230.7,fat:83.6,  muscle:137.6},
+    {label:"2026 Q1",weight:211.6,fat:70.0,  muscle:136.0},
+    {label:"2026 Q2",weight:207.8,fat:30.7,  muscle:null}
+  ],
+  labs: {
+    date: "February 2026", nextDue: "January 2027",
+    metrics: [
+      {name:"Total Cholesterol",value:"172",unit:"mg/dL",normal:"<200",status:"ok"},
+      {name:"LDL-C ★",          value:"104",unit:"mg/dL",normal:"<100",status:"borderline"},
+      {name:"HDL",              value:"42", unit:"mg/dL",normal:">40", status:"ok"},
+      {name:"Triglycerides",    value:"134",unit:"mg/dL",normal:"<150",status:"ok"},
+      {name:"A1c ★",            value:"5.4",unit:"%",    normal:"<5.7%",status:"ok"},
+      {name:"Blood Pressure",   value:"118/76",unit:"mmHg",normal:"<120/80",status:"ok"},
+      {name:"Fasting Glucose",  value:"94", unit:"mg/dL",normal:"70-100",status:"ok"},
+      {name:"VO2 Max",          value:"35.2",unit:"ml/kg/min",normal:">35",status:"ok"}
+    ]
+  },
+  meals: [
+    {date:"Mar 30",meal:"Breakfast",time:"9:00 AM",food:"2 Hard Boiled Eggs",     calories:140,protein:12,carbs:1, fat:10,coach:"Perfect protein start!"},
+    {date:"Mar 30",meal:"Breakfast",time:"9:00 AM",food:"Lipton Black Tea + Equal",calories:5,  protein:0, carbs:1, fat:0, coach:"Zero sugar — smart choice"},
+    {date:"Mar 30",meal:"Lunch",    time:"1:00 PM",food:"Spaghetti + Carbone Tomato Sauce",calories:520,protein:14,carbs:82,fat:10,coach:"Try whole wheat pasta next time!"},
+    {date:"Mar 30",meal:"Lunch",    time:"1:00 PM",food:"Zero Sugar Snapple Raspberry",calories:5,protein:0,carbs:0,fat:0,coach:"Excellent swap for regular soda!"}
+  ],
+  coaching: [
+    {badge:"badge-win",   label:"Win",       text:"May 31: 14,064 steps and 6.4 miles — your biggest step day in months! That kind of output is exactly what moves the scale toward 195."},
+    {badge:"badge-weight",label:"Weight",    text:"207.8 lbs as of May 29 — 52.2 lbs lost from your 260 lb peak. All-time low was 206.6 on May 15. You are 12.8 lbs from goal."},
+    {badge:"badge-food",  label:"Nutrition", text:"LDL dropped from 147 to 104 — outstanding! Salmon, falafel, and lighter meals are working. Keep leaning on fish and plant protein."},
+    {badge:"badge-goal",  label:"Goal",      text:"Target: 195 lbs. At current pace (~0.5 lb/week) you could hit it by late summer. Two strong step days per week will accelerate that."},
+    {badge:"badge-alert", label:"Watch",     text:"Sleep is your biggest gap — most nights showing no data or under 7 hrs. Even one extra hour would help recovery and the Wegovy work better."}
+  ]
+};
+
+// ─── HELPERS ──────────────────────────────────────────────────────
+const fmt = (v, dec=1) => v == null ? '—' : Number(v).toFixed(dec);
+const fmtInt = v => v == null ? '—' : Math.round(v).toLocaleString();
+
+// ─── RENDER FUNCTIONS ─────────────────────────────────────────────
+function renderHeader(p) {
+  document.getElementById('hdr-updated').textContent = 'Updated: ' + (DATA.lastUpdated || p.lastUpdated);
+  document.getElementById('hdr-weight').textContent = Number(p.currentWeight).toFixed(1) + ' lbs → goal ' + p.goalWeight + ' lbs';
+}
+
+function renderCards(p) {
+  const lost = p.startWeight - p.currentWeight;
+  const toGo = p.currentWeight - p.goalWeight;
+  const avgSteps = Math.round(DATA.weekly.reduce((s,d)=>s+d.steps,0)/DATA.weekly.length);
+  const sleepDays = DATA.weekly.filter(d=>d.sleepHr!=null);
+  const avgSleep = sleepDays.length ? (sleepDays.reduce((s,d)=>s+d.sleepHr,0)/sleepDays.length).toFixed(1) : '—';
+  const bestSteps = Math.max(...DATA.weekly.map(d=>d.steps));
+  const calDays = DATA.weekly.filter(d=>d.activeKcal!=null && d.activeKcal > 0);
+  const avgCal = calDays.length ? Math.round(calDays.reduce((s,d)=>s+d.activeKcal,0)/calDays.length) : 0;
+
+  document.getElementById('stat-cards').innerHTML = `
+    <div class="card card-weight">
+      <div class="card-label">Current Weight</div>
+      <div class="card-value">${Number(p.currentWeight).toFixed(1)} lbs</div>
+      <div class="card-sub">Goal: ${p.goalWeight} lbs (${Number(toGo).toFixed(1)} to go)</div>
+    </div>
+    <div class="card card-lost">
+      <div class="card-label">Total Lost</div>
+      <div class="card-value">${Number(lost).toFixed(1)} lbs 🎉</div>
+      <div class="card-sub">From ${p.startWeight} lb peak</div>
+    </div>
+    <div class="card card-steps">
+      <div class="card-label">Best Day Steps</div>
+      <div class="card-value">${fmtInt(bestSteps)}</div>
+      <div class="card-sub">Avg this week: ${fmtInt(avgSteps)}</div>
+    </div>
+    <div class="card card-cal">
+      <div class="card-label">Avg Active Cal</div>
+      <div class="card-value">~${fmtInt(avgCal)}</div>
+      <div class="card-sub">Per day this week</div>
+    </div>
+    <div class="card card-sleep">
+      <div class="card-label">Avg Sleep</div>
+      <div class="card-value">${avgSleep} hrs</div>
+      <div class="card-sub">Goal: 7+ hours/night</div>
+    </div>
+    <div class="card card-hr">
+      <div class="card-label">Avg Heart Rate</div>
+      <div class="card-value">~${fmt(DATA.weekly.filter(d=>d.hrAvg&&d.hrAvg>35).reduce((s,d,i,a)=>s+d.hrAvg/a.filter(x=>x.hrAvg&&x.hrAvg>35).length,0),0)} bpm</div>
+      <div class="card-sub">Resting: ~65 bpm</div>
+    </div>`;
+}
+
+function renderGoalBar(p) {
+  const total = p.startWeight - p.goalWeight;
+  const lost  = p.startWeight - p.currentWeight;
+  const pct   = Math.min(100, Math.round(lost/total*100));
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = pct + '% complete — ' + Number(lost).toFixed(1) + ' lbs lost, ' + Number(p.currentWeight - p.goalWeight).toFixed(1) + ' lbs to go';
+  document.getElementById('prog-mid').textContent = 'Current: ' + Number(p.currentWeight).toFixed(1) + ' lbs';
+}
+
+function renderWeekTable() {
+  const maxSteps = Math.max(...DATA.weekly.map(d=>d.steps));
+  document.getElementById('week-body').innerHTML = DATA.weekly.map(d => {
+    const isBest = d.steps === maxSteps;
+    const pct = Math.round(d.steps/maxSteps*100);
+    return `<tr class="${isBest?'best':''}">
+      <td><strong>${d.date}</strong></td>
+      <td><div class="steps-bar">
+        <span>${fmtInt(d.steps)}</span>
+        <div class="steps-bar-inner"><div class="steps-bar-fill" style="width:${pct}%"></div></div>
+      </div></td>
+      <td>${d.distance != null ? fmt(d.distance) + ' mi' : '—'}</td>
+      <td>${(d.activeKcal && d.activeKcal > 0) ? fmtInt(d.activeKcal) + ' kcal' : '—'}</td>
+      <td>${d.sleepHr!=null ? fmt(d.sleepHr) + ' h' : '—'}</td>
+      <td>${(d.hrAvg && d.hrAvg > 35) ? fmt(d.hrAvg,0) + ' bpm' : '—'}</td>
+      <td>${d.weight ? fmt(d.weight) + ' lbs' : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function sanitizeCoachText(text) {
+  // Strip clearly corrupt weight values (>300 lbs) from coaching text
+  // These arise from kg→lbs conversion errors in older Withings data
+  return text.replace(/\b(3[0-9]{2}|[4-9]\d{2})\s*(lbs?|pounds?)/gi, '[data error]');
+}
+
+function renderCoaching() {
+  const c = DATA.coaching;
+  if (!c) { document.getElementById('coaching-grid').innerHTML = '<p style="opacity:.6">No coaching data.</p>'; return; }
+
+  // Handle legacy array format {badge, label, text}
+  if (Array.isArray(c)) {
+    document.getElementById('coaching-grid').innerHTML = c.map(item => `
+      <div class="coaching-item">
+        <span class="badge ${item.badge}">${item.label}</span>
+        <div class="coaching-text">${sanitizeCoachText(item.text)}</div>
+      </div>`).join('');
+    return;
+  }
+
+  // Handle Gist dict format {summary, wins[], focus[], lastCoach}
+  const wins = (c.wins || []).map(w => `<li>${w}</li>`).join('');
+  const focus = (c.focus || []).map(f => `<li>${f}</li>`).join('');
+  document.getElementById('coaching-grid').innerHTML = `
+    <div class="coaching-item" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <div class="coaching-text" style="font-size:14px">${c.summary || ''}</div>
+      ${wins ? `<div style="width:100%"><div class="badge badge-win" style="margin-bottom:6px">Wins</div><ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.7">${wins}</ul></div>` : ''}
+      ${focus ? `<div style="width:100%"><div class="badge badge-alert" style="margin-bottom:6px">Focus</div><ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.7">${focus}</ul></div>` : ''}
+      ${c.lastCoach ? `<div style="opacity:.5;font-size:11px">Coach note: ${c.lastCoach}</div>` : ''}
+    </div>`;
+}
+
+function renderMeals() {
+  const meals = DATA.meals;
+  if (!meals || !meals.length) {
+    document.getElementById('meal-list').innerHTML = '<p style="opacity:.6;padding:12px 0">No meals logged this week.</p>';
+    document.getElementById('meal-total').innerHTML = '';
+    return;
+  }
+
+  // Normalize any meal entry to a consistent shape
+  function normalizeMeal(m) {
+    const mealType = m.meal || m.type || 'Meal';
+    let food = m.food || '';
+    if (!food && m.items) {
+      food = Array.isArray(m.items)
+        ? m.items.map(i => typeof i === 'string' ? i : (i.name || i.food || '')).filter(Boolean).join(', ')
+        : '';
+    }
+    const cal      = m.calories ?? m.cal ?? m.totalCalories ?? (m.total && m.total.cal) ?? 0;
+    const protein  = m.protein  ?? m.totalProtein  ?? (m.total && m.total.protein)  ?? 0;
+    const carbs    = m.carbs    ?? m.totalCarbs    ?? (m.total && m.total.carbs)    ?? 0;
+    const fat      = m.fat      ?? m.totalFat      ?? (m.total && m.total.fat)      ?? 0;
+    const coach    = m.coach || m.coachComment || m.coachNote || '';
+    return { date: m.date, mealType, food, cal, protein, carbs, fat, coach };
+  }
+
+  // Group normalized meals by date
+  const byDate = {};
+  meals.forEach(m => {
+    const n = normalizeMeal(m);
+    if (!byDate[n.date]) byDate[n.date] = [];
+    byDate[n.date].push(n);
+  });
+
+  const mealTypeClass = t => 'mb-' + (t || 'meal').toLowerCase();
+  let html = '';
+  let weekCal = 0, weekPro = 0, weekCarb = 0, weekFat = 0;
+
+  Object.keys(byDate).sort().reverse().forEach(date => {
+    const dayMeals = byDate[date];
+    const dayCal  = dayMeals.reduce((s,m)=>s+(Number(m.cal)||0),0);
+    const dayPro  = dayMeals.reduce((s,m)=>s+(Number(m.protein)||0),0);
+    const dayCarb = dayMeals.reduce((s,m)=>s+(Number(m.carbs)||0),0);
+    const dayFat  = dayMeals.reduce((s,m)=>s+(Number(m.fat)||0),0);
+    weekCal += dayCal; weekPro += dayPro; weekCarb += dayCarb; weekFat += dayFat;
+    html += `<div style="font-size:15px;font-weight:800;color:#1A6B3C;letter-spacing:.1px;padding:16px 0 8px;border-top:3px solid #e8f5e9;margin-top:8px">${date} <span style="font-size:12px;font-weight:500;color:#666">&nbsp;·&nbsp; ${dayCal} kcal</span></div>`;
+    dayMeals.forEach(m => {
+      html += `<div class="meal-row">
+        <span class="meal-badge ${mealTypeClass(m.mealType)}">${m.mealType}</span>
+        <span>${m.food || '—'}</span>
+        <span>${m.cal ? Math.round(m.cal) : '—'} kcal</span>
+        <span>${m.protein ? Math.round(m.protein) + 'g' : '—'}</span>
+        <span>${m.carbs ? Math.round(m.carbs) + 'g' : '—'}</span>
+        <span>${m.fat ? Math.round(m.fat) + 'g' : '—'}</span>
+      </div>${m.coach ? `<div style="font-size:11px;color:#888;font-style:italic;padding:2px 0 8px 14px;margin-top:-4px">${m.coach}</div>` : ''}`;
+    });
+    html += `<div style="display:grid;grid-template-columns:80px 1fr 60px 50px 50px 50px;gap:8px;padding:10px 12px;margin:8px 0 4px;background:#e8f5e9;border-radius:8px;border:1px solid #c8e6c9;font-size:13px;font-weight:700;color:#1A6B3C">
+      <span style="grid-column:1/3"><strong>Total for ${date}</strong></span>
+      <span>${Math.round(dayCal)} kcal</span>
+      <span>${Math.round(dayPro)}g</span>
+      <span>${Math.round(dayCarb)}g</span>
+      <span>${Math.round(dayFat)}g</span>
+    </div>`;
+  });
+
+  document.getElementById('meal-list').innerHTML = html;
+  document.getElementById('meal-total').innerHTML = `
+    <span>Week Total</span>
+    <span>${Math.round(weekCal)} kcal &nbsp;|&nbsp; Protein: ${Math.round(weekPro)}g &nbsp;|&nbsp; Carbs: ${Math.round(weekCarb)}g &nbsp;|&nbsp; Fat: ${Math.round(weekFat)}g</span>`;
+}
+
+function renderLabs() {
+  const labs = DATA.labs;
+  document.getElementById('lab-date').textContent = labs.date || labs.lastUpdated || '';
+  document.getElementById('lab-next').textContent = labs.nextDue || 'Jan 2027';
+  document.getElementById('labs-grid').innerHTML = (labs.metrics || []).map(m => {
+    const isOk = m.status === 'ok' || m.status === 'normal';
+    const isHigh = m.status === 'high';
+    const statusLabel = isOk ? '✓ Normal' : isHigh ? '⚠ High' : '~ Borderline';
+    const normalRange = m.normal || m.reference || '';
+    return `
+    <div class="lab-card lab-${isOk ? 'ok' : m.status}">
+      <div class="lab-name">${m.name}</div>
+      <div class="lab-value">${m.value} <small style="font-size:12px;font-weight:400">${m.unit}</small></div>
+      <div class="lab-normal">Normal: ${normalRange}</div>
+      <div class="lab-status">${statusLabel}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── CHARTS ───────────────────────────────────────────────────────
+function renderCharts() {
+  const wk = DATA.weekly;
+  const labels = wk.map(d => d.date);
+
+  Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  Chart.defaults.font.size = 12;
+
+  // Weight chart
+  const wtData = wk.map(d => d.weight);
+  const wtValid = wtData.filter(v=>v!==null);
+  const wtMin = Math.min(...wtValid) - 2;
+  const wtMax = Math.max(...wtValid) + 2;
+  document.getElementById('wt-sub').textContent =
+    'Range this week: ' + Math.min(...wtValid).toFixed(1) + ' – ' + Math.max(...wtValid).toFixed(1) + ' lbs  |  Goal: 195 lbs (red dashed)';
+
+  new Chart(document.getElementById('chartWeight'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Weight (lbs)',
+          data: wtData,
+          borderColor: '#1A6B3C',
+          backgroundColor: 'rgba(26,107,60,0.08)',
+          borderWidth: 3,
+          pointRadius: 6,
+          pointBackgroundColor: '#1A6B3C',
+          pointBorderColor: 'white',
+          pointBorderWidth: 2,
+          tension: 0,
+          spanGaps: true,
+          fill: true
+        },
+        {
+          label: 'Goal: 195 lbs',
+          data: wk.map(()=>195),
+          borderColor: '#E53935',
+          borderWidth: 2,
+          borderDash: [6,4],
+          pointRadius: 0,
+          tension: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 16, font: { size: 12 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + (ctx.raw ? ctx.raw.toFixed(1) + ' lbs' : 'No data') } }
+      },
+      scales: {
+        y: { min: wtMin, max: wtMax, title: { display: true, text: 'Weight (lbs)', font: { size: 12, weight: '600' } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { title: { display: true, text: 'Date', font: { size: 12, weight: '600' } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // Steps chart
+  const stepsColors = wk.map(d => d.steps >= 7000 ? '#1A6B3C' : '#90CAA8');
+  new Chart(document.getElementById('chartSteps'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Steps',
+        data: wk.map(d=>d.steps),
+        backgroundColor: stepsColors,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => 'Steps: ' + ctx.raw.toLocaleString() + (ctx.raw >= 7000 ? ' ✓ Goal met!' : ' (goal: 7,000)') } },
+        annotation: {}
+      },
+      scales: {
+        y: { title: { display: true, text: 'Steps', font: { size: 12, weight: '600' } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { title: { display: true, text: 'Date', font: { size: 12, weight: '600' } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // Sleep chart
+  new Chart(document.getElementById('chartSleep'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Sleep (hours)',
+          data: wk.map(d=>d.sleepHr),
+          borderColor: '#3949AB',
+          backgroundColor: 'rgba(57,73,171,0.08)',
+          borderWidth: 3,
+          pointRadius: 6,
+          pointBackgroundColor: '#3949AB',
+          pointBorderColor: 'white',
+          pointBorderWidth: 2,
+          tension: 0,
+          spanGaps: false,
+          fill: true
+        },
+        {
+          label: 'Goal: 7 hrs',
+          data: wk.map(()=>7),
+          borderColor: '#1A6B3C',
+          borderWidth: 2,
+          borderDash: [5,4],
+          pointRadius: 0,
+          tension: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 16 } } },
+      scales: {
+        y: { min: 0, max: 10, title: { display: true, text: 'Hours', font: { size: 12, weight: '600' } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { title: { display: true, text: 'Date', font: { size: 12, weight: '600' } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // Calories chart
+  new Chart(document.getElementById('chartCal'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Active Calories (kcal)',
+        data: wk.map(d=>d.activeKcal),
+        backgroundColor: wk.map(d => d.activeKcal >= 500 ? '#E65100' : '#FFAB76'),
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.raw + ' kcal' } } },
+      scales: {
+        y: { title: { display: true, text: 'Calories (kcal)', font: { size: 12, weight: '600' } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { title: { display: true, text: 'Date', font: { size: 12, weight: '600' } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // Long-term weight — sorted oldest→newest
+  const parseQ = s => { const [y,q] = (s.period||s.label).split(' '); return parseInt(y)*10 + parseInt((q||'Q0')[1]); };
+  const qt = [...DATA.quarterly].sort((a,b) => parseQ(a) - parseQ(b));
+  new Chart(document.getElementById('chartLTWeight'), {
+    type: 'line',
+    data: {
+      labels: qt.map(d=>d.period || d.label),
+      datasets: [
+        {
+          label: 'Weight (lbs)',
+          data: qt.map(d=>d.weight),
+          borderColor: '#1A6B3C',
+          backgroundColor: 'rgba(26,107,60,0.06)',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#1A6B3C',
+          pointBorderColor: 'white',
+          pointBorderWidth: 1.5,
+          tension: 0,
+          fill: true
+        },
+        {
+          label: 'Goal: 195 lbs',
+          data: qt.map(()=>195),
+          borderColor: '#E53935',
+          borderWidth: 2,
+          borderDash: [6,4],
+          pointRadius: 0,
+          tension: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 16 } } },
+      scales: {
+        y: { min: 185, max: 270, title: { display: true, text: 'Weight (lbs)', font: { size: 12, weight: '600' } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+        x: { title: { display: true, text: 'Quarter', font: { size: 12, weight: '600' } }, ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 12 }, grid: { display: false } }
+      }
+    }
+  });
+
+  // Body composition — dual axis: Body Fat % (orange, left) + Muscle Mass lbs (green, right)
+  const qtComp = qt.filter(d=>d.fat!=null&&d.muscle!=null&&d.weight!=null);
+  if (!qtComp.length) {
+    const bc = document.getElementById('chartBodyComp');
+    bc.parentNode.innerHTML = '<p style="text-align:center;padding:60px 0;color:#aaa;font-size:13px">Body composition data not yet available.<br>Will populate as Withings scale syncs fat/muscle data.</p>';
+  } else {
+  new Chart(document.getElementById('chartBodyComp'), {
+    type: 'line',
+    data: {
+      labels: qtComp.map(d=>d.period || d.label),
+      datasets: [
+        {
+          label: 'Body Fat %',
+          data: qtComp.map(d=>+((d.fat/d.weight)*100).toFixed(1)),
+          borderColor: '#E65100',
+          backgroundColor: 'rgba(230,81,0,0.06)',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#E65100',
+          pointBorderColor: 'white',
+          pointBorderWidth: 1.5,
+          tension: 0,
+          fill: false,
+          yAxisID: 'yFat'
+        },
+        {
+          label: 'Muscle Mass (lbs)',
+          data: qtComp.map(d=>d.muscle),
+          borderColor: '#1A6B3C',
+          backgroundColor: 'rgba(26,107,60,0.06)',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#1A6B3C',
+          pointBorderColor: 'white',
+          pointBorderWidth: 1.5,
+          tension: 0,
+          fill: false,
+          yAxisID: 'yMuscle'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 16 } } },
+      scales: {
+        yFat: {
+          type: 'linear', position: 'left',
+          min: 25, max: 45,
+          title: { display: true, text: 'Body Fat %', font: { size: 12, weight: '600' } },
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: { callback: v => v + '%' }
+        },
+        yMuscle: {
+          type: 'linear', position: 'right',
+          min: 120, max: 170,
+          title: { display: true, text: 'Muscle Mass (lbs)', font: { size: 12, weight: '600' } },
+          grid: { drawOnChartArea: false },
+          ticks: { callback: v => v + ' lbs' }
+        },
+        x: { title: { display: true, text: 'Quarter', font: { size: 12, weight: '600' } }, ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 10 }, grid: { display: false } }
+      }
+    }
+  });
+  } // end body comp else
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+function init(d) {
+  // Normalize profile field names — Gist uses different keys than embedded DATA
+  if (d.profile) {
+    d.profile.goalWeight  = d.profile.goalWeight  || d.profile.targetWeight || 195;
+    d.profile.startWeight = d.profile.startWeight || d.profile.peakWeight   || 261;
+  }
+  DATA = d;  // update global so all render functions use live data
+  const steps = ['renderHeader','renderCards','renderGoalBar','renderWeekTable','renderCoaching','renderMeals','renderLabs','renderCharts'];
+  const fns = [()=>renderHeader(d.profile), ()=>renderCards(d.profile), ()=>renderGoalBar(d.profile),
+                renderWeekTable, renderCoaching, renderMeals, renderLabs, renderCharts];
+  for (let i = 0; i < fns.length; i++) {
+    try { fns[i](); }
+    catch(e) {
+      console.error('[Dashboard] ' + steps[i] + ' crashed:', e);
+      showDataBanner('fallback', steps[i] + ' error: ' + e.message);
+    }
+  }
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+}
+
+// Fetch live data from Gist, fall back to embedded DATA if unavailable
+const GIST_URL = 'https://gist.githubusercontent.com/charlessued/576f97f3cd6bd4964f294d255e9b3572/raw/data.json';
+
+function showDataBanner(source, detail) {
+  const banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;padding:6px 16px;font-size:12px;font-family:monospace;';
+  if (source === 'gist') {
+    banner.style.background = '#1b5e20';
+    banner.style.color = '#a5d6a7';
+    banner.textContent = '✓ Live data loaded from Gist — ' + detail;
+  } else {
+    banner.style.background = '#b71c1c';
+    banner.style.color = '#ffcdd2';
+    banner.textContent = '⚠ Gist fetch failed — showing embedded data from May 29. Error: ' + detail;
+  }
+  document.body.prepend(banner);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  fetch(GIST_URL + '?t=' + Date.now())  // cache-bust
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(live => {
+      console.log('[Dashboard] Gist loaded. lastUpdated:', live.lastUpdated, '| weight:', live.profile && live.profile.currentWeight);
+      // Gist always wins — use embedded DATA only as fallback for any missing keys
+      const merged = Object.assign({}, DATA, live);
+      // Merge quarterly: normalize all entries to use label key.
+      {
+        const baseQ = {};
+        (DATA.quarterly || []).forEach(q => {
+          const key = q.label || q.period;
+          baseQ[key] = Object.assign({}, q, {label: key});
+        });
+        (live.quarterly || []).forEach(q => {
+          const key = q.label || q.period;
+          if (baseQ[key]) {
+            baseQ[key] = Object.assign({}, baseQ[key], {label: key},
+              q.weight  ? {weight:  q.weight}  : {},
+              q.fat     ? {fat:     q.fat}      : {},
+              q.muscle  ? {muscle:  q.muscle}   : {}
+            );
+          } else {
+            baseQ[key] = Object.assign({}, q, {label: key});
+          }
+        });
+        merged.quarterly = Object.values(baseQ);
+      }
+      showDataBanner('gist', 'Updated ' + (live.lastUpdated || 'unknown') + ' | Weight: ' + (live.profile && live.profile.currentWeight ? live.profile.currentWeight + ' lbs' : '?'));
+      init(merged);
+    })
+    .catch(err => {
+      console.error('[Dashboard] Gist fetch failed:', err);
+      showDataBanner('fallback', err.message);
+      init(DATA);
+    });
+});
+</script>
+</body>
+</html>
