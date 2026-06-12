@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- Charles Health Dashboard | Built 2026-06-12c -->
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -227,7 +228,7 @@ footer{text-align:center;padding:24px;font-size:12px;color:#aaa}
   <!-- LONG TERM SECTION -->
   <div class="lt-header">
     <h2>📊 Long-Term Weight Journey — 2020 to 2026</h2>
-    <p>Quarterly Withings scale data &nbsp;|&nbsp; Peak: 258 lbs (Q1 2023) → Current: 207.8 lbs → Goal: 195 lbs</p>
+    <p>Quarterly Withings scale data &nbsp;|&nbsp; Peak: 258 lbs (Q1 2023) → Current: 210 lbs → Goal: 195 lbs</p>
   </div>
 
   <div class="grid-2">
@@ -259,21 +260,21 @@ const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWByE_JhsHCe
 let DATA = {
   profile: {
     name: "Charles",
-    currentWeight: 207.8,
+    currentWeight: 207.9,
     goalWeight: 195,
     startWeight: 260,
-    totalLost: 52.2,
+    totalLost: 52.1,
     targetCalories: 1850,
-    lastUpdated: "June 1, 2026"
+    lastUpdated: "June 12, 2026"
   },
   weekly: [
-    {date:"May 25",weight:206.9,steps:10319,activeKcal:626,sleepHr:5.86,hrAvg:81.1,distance:4.86},
-    {date:"May 26",weight:208.2,steps:6377, activeKcal:541,sleepHr:null,hrAvg:87.6,distance:3.00},
-    {date:"May 27",weight:208.7,steps:7363, activeKcal:723,sleepHr:6.67,hrAvg:75.6,distance:3.54},
-    {date:"May 28",weight:208.8,steps:7088, activeKcal:550,sleepHr:null,hrAvg:75.1,distance:3.26},
-    {date:"May 29",weight:207.8,steps:4387, activeKcal:433,sleepHr:null,hrAvg:76.8,distance:2.05},
-    {date:"May 30",weight:null, steps:12758,activeKcal:814,sleepHr:null,hrAvg:80.3,distance:5.89},
-    {date:"May 31",weight:null, steps:14064,activeKcal:749,sleepHr:null,hrAvg:92.2,distance:6.43}
+    {date:"Jun 5", weight:207.3,steps:6757, activeKcal:569.9,sleepHr:6.16,hrAvg:73.2,distance:3.17},
+    {date:"Jun 6", weight:null, steps:3444, activeKcal:402.0,sleepHr:null, hrAvg:74.4,distance:1.54},
+    {date:"Jun 7", weight:212.1,steps:3132, activeKcal:321.1,sleepHr:null, hrAvg:75.6,distance:1.46},
+    {date:"Jun 8", weight:210.8,steps:4239, activeKcal:456.4,sleepHr:5.50, hrAvg:70.0,distance:1.99},
+    {date:"Jun 9", weight:209.0,steps:5050, activeKcal:482.2,sleepHr:7.44, hrAvg:72.6,distance:2.35},
+    {date:"Jun 10",weight:207.9,steps:5635, activeKcal:531.0,sleepHr:6.89, hrAvg:70.1,distance:2.64},
+    {date:"Jun 11",weight:208.5,steps:5996, activeKcal:497.1,sleepHr:6.72, hrAvg:71.9,distance:2.73}
   ],
   quarterly: [
     {label:"2020 Q1",weight:241.1,fat:null,  muscle:null},
@@ -299,7 +300,8 @@ let DATA = {
     {label:"2025 Q3",weight:214.6,fat:69.4,  muscle:137.1},
     {label:"2025 Q4",weight:230.7,fat:83.6,  muscle:137.6},
     {label:"2026 Q1",weight:211.6,fat:70.0,  muscle:136.0},
-    {label:"2026 Q2",weight:207.8,fat:30.7,  muscle:null}
+    {label:"2023 Q4",weight:232.0,fat:null,  muscle:null},
+    {label:"2026 Q2",weight:207.9,fat:69.2,  muscle:138.7}
   ],
   labs: {
     date: "February 2026", nextDue: "January 2027",
@@ -307,11 +309,11 @@ let DATA = {
       {name:"Total Cholesterol",value:"172",unit:"mg/dL",normal:"<200",status:"ok"},
       {name:"LDL-C ★",          value:"104",unit:"mg/dL",normal:"<100",status:"borderline"},
       {name:"HDL",              value:"42", unit:"mg/dL",normal:">40", status:"ok"},
-      {name:"Triglycerides",    value:"134",unit:"mg/dL",normal:"<150",status:"ok"},
+      {name:"Triglycerides",    value:"130",unit:"mg/dL",normal:"<150",status:"ok"},
       {name:"A1c ★",            value:"5.4",unit:"%",    normal:"<5.7%",status:"ok"},
-      {name:"Blood Pressure",   value:"118/76",unit:"mmHg",normal:"<120/80",status:"ok"},
+      {name:"Blood Pressure",   value:"117/78",unit:"mmHg",normal:"<120/80",status:"ok"},
       {name:"Fasting Glucose",  value:"94", unit:"mg/dL",normal:"70-100",status:"ok"},
-      {name:"VO2 Max",          value:"35.2",unit:"ml/kg/min",normal:">35",status:"ok"}
+      {name:"VO2 Max",          value:"35.2",unit:"ml/kg/min",normal:">35",status:"borderline"}
     ]
   },
   meals: [
@@ -321,11 +323,12 @@ let DATA = {
     {date:"Mar 30",meal:"Lunch",    time:"1:00 PM",food:"Zero Sugar Snapple Raspberry",calories:5,protein:0,carbs:0,fat:0,coach:"Excellent swap for regular soda!"}
   ],
   coaching: [
-    {badge:"badge-win",   label:"Win",       text:"May 31: 14,064 steps and 6.4 miles — your biggest step day in months! That kind of output is exactly what moves the scale toward 195."},
-    {badge:"badge-weight",label:"Weight",    text:"207.8 lbs as of May 29 — 52.2 lbs lost from your 260 lb peak. All-time low was 206.6 on May 15. You are 12.8 lbs from goal."},
-    {badge:"badge-food",  label:"Nutrition", text:"LDL dropped from 147 to 104 — outstanding! Salmon, falafel, and lighter meals are working. Keep leaning on fish and plant protein."},
-    {badge:"badge-goal",  label:"Goal",      text:"Target: 195 lbs. At current pace (~0.5 lb/week) you could hit it by late summer. Two strong step days per week will accelerate that."},
-    {badge:"badge-alert", label:"Watch",     text:"Sleep is your biggest gap — most nights showing no data or under 7 hrs. Even one extra hour would help recovery and the Wegovy work better."}
+    {badge:"badge-win",   label:"Win",       text:"Sat Mar 28: 10,049 steps, 2.9 miles, ~700 cal burned! That is exactly the effort that gets you to 195 lbs. Outstanding!"},
+    {badge:"badge-weight",label:"Weight",    text:"Holding steady at ~210 lbs this week. You have lost 50 lbs total — incredible. Stay consistent and the last 15 will follow."},
+    {badge:"badge-food",  label:"Nutrition", text:"Hard boiled eggs + black tea = perfect breakfast. Try whole wheat pasta next time for your LDL. Zero Sugar Snapple = great swap!"},
+    {badge:"badge-chol",  label:"Cholesterol",text:"LDL is 147 (goal <100). Cut saturated fat, eat oats/salmon/walnuts. Every walk you take also slowly raises your HDL — two wins!"},
+    {badge:"badge-goal",  label:"This Week", text:"① 7,000+ steps 3+ days  ② ~1,850 cal/day  ③ One salmon or tuna meal  ④ Try whole wheat pasta or oatmeal once  ⑤ 8 glasses water"},
+    {badge:"badge-alert", label:"Passover",  text:"April 12–20: No pasta or bread! Plan with eggs, fish, meat, potatoes, vegetables. Matzah is calorie-dense — still track it!"}
   ]
 };
 
@@ -346,7 +349,7 @@ function renderCards(p) {
   const sleepDays = DATA.weekly.filter(d=>d.sleepHr!=null);
   const avgSleep = sleepDays.length ? (sleepDays.reduce((s,d)=>s+d.sleepHr,0)/sleepDays.length).toFixed(1) : '—';
   const bestSteps = Math.max(...DATA.weekly.map(d=>d.steps));
-  const calDays = DATA.weekly.filter(d=>d.activeKcal!=null && d.activeKcal > 0);
+  const calDays = DATA.weekly.filter(d=>d.activeKcal!=null);
   const avgCal = calDays.length ? Math.round(calDays.reduce((s,d)=>s+d.activeKcal,0)/calDays.length) : 0;
 
   document.getElementById('stat-cards').innerHTML = `
@@ -377,7 +380,7 @@ function renderCards(p) {
     </div>
     <div class="card card-hr">
       <div class="card-label">Avg Heart Rate</div>
-      <div class="card-value">~${fmt(DATA.weekly.filter(d=>d.hrAvg&&d.hrAvg>35).reduce((s,d,i,a)=>s+d.hrAvg/a.filter(x=>x.hrAvg&&x.hrAvg>35).length,0),0)} bpm</div>
+      <div class="card-value">~${fmt(DATA.weekly.filter(d=>d.hrAvg).reduce((s,d,i,a)=>s+d.hrAvg/a.length,0),0)} bpm</div>
       <div class="card-sub">Resting: ~65 bpm</div>
     </div>`;
 }
@@ -403,17 +406,15 @@ function renderWeekTable() {
         <div class="steps-bar-inner"><div class="steps-bar-fill" style="width:${pct}%"></div></div>
       </div></td>
       <td>${d.distance != null ? fmt(d.distance) + ' mi' : '—'}</td>
-      <td>${(d.activeKcal && d.activeKcal > 0) ? fmtInt(d.activeKcal) + ' kcal' : '—'}</td>
-      <td>${d.sleepHr!=null ? fmt(d.sleepHr) + ' h' : '—'}</td>
-      <td>${(d.hrAvg && d.hrAvg > 35) ? fmt(d.hrAvg,0) + ' bpm' : '—'}</td>
+      <td>${(d.activeKcal != null && d.activeKcal > 0) ? fmtInt(d.activeKcal) + ' kcal' : '—'}</td>
+      <td>${(d.sleepHr!=null && d.sleepHr > 0) ? fmt(d.sleepHr) + ' h' : '—'}</td>
+      <td>${fmt(d.hrAvg,0)} bpm</td>
       <td>${d.weight ? fmt(d.weight) + ' lbs' : '—'}</td>
     </tr>`;
   }).join('');
 }
 
 function sanitizeCoachText(text) {
-  // Strip clearly corrupt weight values (>300 lbs) from coaching text
-  // These arise from kg→lbs conversion errors in older Withings data
   return text.replace(/\b(3[0-9]{2}|[4-9]\d{2})\s*(lbs?|pounds?)/gi, '[data error]');
 }
 
@@ -534,6 +535,13 @@ function renderLabs() {
 
 // ─── CHARTS ───────────────────────────────────────────────────────
 function renderCharts() {
+  // Destroy any existing chart instances to prevent canvas reuse errors
+  ['chartWeight','chartSteps','chartSleep','chartCal','chartLTWeight','chartBodyComp'].forEach(id => {
+    const canvas = document.getElementById(id);
+    if (canvas && Chart.getChart(canvas)) {
+      Chart.getChart(canvas).destroy();
+    }
+  });
   const wk = DATA.weekly;
   const labels = wk.map(d => d.date);
 
@@ -629,7 +637,8 @@ function renderCharts() {
       datasets: [
         {
           label: 'Sleep (hours)',
-          data: wk.map(d=>d.sleepHr),
+          data: wk.map(d=>d.sleepHr != null ? d.sleepHr : null),
+          spanGaps: true,
           borderColor: '#3949AB',
           backgroundColor: 'rgba(57,73,171,0.08)',
           borderWidth: 3,
@@ -670,7 +679,7 @@ function renderCharts() {
       labels,
       datasets: [{
         label: 'Active Calories (kcal)',
-        data: wk.map(d=>d.activeKcal),
+        data: wk.map(d=>d.activeKcal != null ? d.activeKcal : null),
         backgroundColor: wk.map(d => d.activeKcal >= 500 ? '#E65100' : '#FFAB76'),
         borderRadius: 6,
         borderSkipped: false
@@ -681,7 +690,7 @@ function renderCharts() {
       maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.raw + ' kcal' } } },
       scales: {
-        y: { title: { display: true, text: 'Calories (kcal)', font: { size: 12, weight: '600' } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        y: { min: 0, suggestedMax: 900, title: { display: true, text: 'Calories (kcal)', font: { size: 12, weight: '600' } }, grid: { color: 'rgba(0,0,0,0.05)' } },
         x: { title: { display: true, text: 'Date', font: { size: 12, weight: '600' } }, grid: { display: false } }
       }
     }
@@ -832,7 +841,7 @@ function showDataBanner(source, detail) {
   } else {
     banner.style.background = '#b71c1c';
     banner.style.color = '#ffcdd2';
-    banner.textContent = '⚠ Gist fetch failed — showing embedded data from May 29. Error: ' + detail;
+    banner.textContent = '⚠ Gist fetch failed — showing embedded data from June 11. Error: ' + detail;
   }
   document.body.prepend(banner);
 }
@@ -847,26 +856,30 @@ window.addEventListener('DOMContentLoaded', () => {
       console.log('[Dashboard] Gist loaded. lastUpdated:', live.lastUpdated, '| weight:', live.profile && live.profile.currentWeight);
       // Gist always wins — use embedded DATA only as fallback for any missing keys
       const merged = Object.assign({}, DATA, live);
-      // Merge quarterly: normalize all entries to use label key.
+      // Merge quarterly: always normalize to label key, embedded wins on history, Gist wins on recent data
       {
         const baseQ = {};
         (DATA.quarterly || []).forEach(q => {
           const key = q.label || q.period;
-          baseQ[key] = Object.assign({}, q, {label: key});
+          baseQ[key] = Object.assign({}, q, {label: key, period: key});
         });
         (live.quarterly || []).forEach(q => {
           const key = q.label || q.period;
           if (baseQ[key]) {
-            baseQ[key] = Object.assign({}, baseQ[key], {label: key},
-              q.weight  ? {weight:  q.weight}  : {},
-              q.fat     ? {fat:     q.fat}      : {},
-              q.muscle  ? {muscle:  q.muscle}   : {}
+            baseQ[key] = Object.assign({}, baseQ[key], {label: key, period: key},
+              q.weight  != null ? {weight:  q.weight}  : {},
+              q.fat     != null ? {fat:     q.fat}      : {},
+              q.muscle  != null ? {muscle:  q.muscle}   : {}
             );
           } else {
-            baseQ[key] = Object.assign({}, q, {label: key});
+            baseQ[key] = Object.assign({}, q, {label: key, period: key});
           }
         });
-        merged.quarterly = Object.values(baseQ);
+        // Sort by year/quarter
+        merged.quarterly = Object.values(baseQ).sort((a,b) => {
+          const pk = s => { const p = (s.label||s.period||'').split(' '); return parseInt(p[0]||0)*10+parseInt((p[1]||'Q0')[1]||0); };
+          return pk(a) - pk(b);
+        });
       }
       showDataBanner('gist', 'Updated ' + (live.lastUpdated || 'unknown') + ' | Weight: ' + (live.profile && live.profile.currentWeight ? live.profile.currentWeight + ' lbs' : '?'));
       init(merged);
